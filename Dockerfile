@@ -133,6 +133,12 @@ RUN if [ "$MODEL_TYPE" = "flux1-dev-fp8" ]; then \
       wget -q -O models/checkpoints/flux1-dev-fp8.safetensors https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors; \
     fi
 
+# Install custom nodes
+RUN comfy-node-install rgthree-comfy comfyui-easy-use comfyui-impact-subpack comfyui_tinyterranodes comfyui_layerstyle
+
+# TODO download models using comfy-cli
+# RUN comfy model download --url https://huggingface.co/KamCastle/jugg/resolve/main/juggernaut_reborn.safetensors --relative-path models/checkpoints --filename juggernaut_reborn.safetensors
+
 # Stage 3: Final image
 FROM base AS final
 
