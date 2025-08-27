@@ -475,6 +475,80 @@ def get_image_data(filename, subfolder, image_type):
         return None
 
 
+def base64_encode(file_path):
+    """
+    Encode a file to base64.
+    
+    Args:
+        file_path (str): Path to the file to encode
+        
+    Returns:
+        str: Base64 encoded string of the file contents
+    """
+    try:
+        with open(file_path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
+    except Exception as e:
+        print(f"worker-comfyui - Error encoding file {file_path} to base64: {e}")
+        return None
+
+
+def process_output_images(outputs, job_id):
+    """
+    Process ComfyUI output images.
+    
+    Args:
+        outputs (dict): The outputs from ComfyUI
+        job_id (str): The job ID for file naming
+        
+    Returns:
+        dict: Status and message about the processing
+    """
+    try:
+        if not outputs:
+            return {"status": "error", "message": "No outputs to process"}
+        
+        uploaded_urls = []
+        errors = []
+        
+        for node_id, node_output in outputs.items():
+            if "images" in node_output:
+                for image_info in node_output["images"]:
+                    filename = image_info.get("filename")
+                    subfolder = image_info.get("subfolder", "")
+                    
+                    if not filename:
+                        continue
+                        
+                    # Build the full path based on COMFY_OUTPUT_PATH
+                    output_path = os.environ.get("COMFY_OUTPUT_PATH", "./ComfyUI/output")
+                    full_path = os.path.join(output_path, subfolder, filename)
+                    
+                    if os.path.exists(full_path):
+                        if os.environ.get("BUCKET_ENDPOINT_URL"):
+                            # Upload to S3/bucket
+                            try:
+                                url = rp_upload.upload_image(job_id, full_path)
+                                uploaded_urls.append(url)
+                            except Exception as e:
+                                error_msg = f"Failed to upload {filename}: {e}"
+                                errors.append(error_msg)
+                        else:
+                            # Return local file info
+                            uploaded_urls.append(f"local_file://{full_path}")
+        
+        if uploaded_urls:
+            message = uploaded_urls[0] if len(uploaded_urls) == 1 else uploaded_urls
+            return {"status": "success", "message": message}
+        elif errors:
+            return {"status": "error", "message": "; ".join(errors)}
+        else:
+            return {"status": "success", "message": "No images found in outputs"}
+            
+    except Exception as e:
+        return {"status": "error", "message": f"Error processing outputs: {e}"}
+
+
 def handler(job):
     """
     Handles a job using ComfyUI via websockets for status and image retrieval.
