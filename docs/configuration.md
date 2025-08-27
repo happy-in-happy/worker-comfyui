@@ -8,6 +8,7 @@ This document outlines the environment variables available for configuring the `
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `REFRESH_WORKER`     | When `true`, the worker pod will stop after each completed job to ensure a clean state for the next job. See the [RunPod documentation](https://docs.runpod.io/docs/handler-additional-controls#refresh-worker) for details. | `false` |
 | `SERVE_API_LOCALLY`  | When `true`, enables a local HTTP server simulating the RunPod environment for development and testing. See the [Development Guide](development.md#local-api) for more details.                                              | `false` |
+| `JUPYTER_TOKEN`      | When set and `SERVE_API_LOCALLY` is `true`, starts Jupyter Lab server at http://localhost:8888 with the provided token for authentication. Useful for development and debugging workflows.                                    | (none)  |
 
 ## Logging Configuration
 

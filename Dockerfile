@@ -61,6 +61,9 @@ RUN if [ "$ENABLE_PYTORCH_UPGRADE" = "true" ]; then \
       uv pip install --force-reinstall torch torchvision torchaudio --index-url ${PYTORCH_INDEX_URL}; \
     fi
 
+# Install Jupyter Lab for local development when SERVE_API_LOCALLY=true
+RUN uv pip install jupyterlab
+
 # Change working directory to ComfyUI
 WORKDIR /comfyui
 
